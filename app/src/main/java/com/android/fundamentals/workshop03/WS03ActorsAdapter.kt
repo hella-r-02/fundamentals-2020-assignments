@@ -11,8 +11,8 @@ import com.android.fundamentals.data.models.Actor
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 
-//TODO 2: make listener constructor parameter
-class WS03ActorsAdapter: RecyclerView.Adapter<ActorsViewHolder>() {
+class WS03ActorsAdapter(private val listener: OnRecyclerItemClicked) :
+    RecyclerView.Adapter<ActorsViewHolder>() {
 
     private var actors = listOf<Actor>()
 
@@ -41,9 +41,12 @@ class WS03ActorsAdapter: RecyclerView.Adapter<ActorsViewHolder>() {
         when (holder) {
             is DataViewHolder -> {
                 holder.onBind(actors[position])
-                //TODO 3: set onClick listener to binded view
+                holder.itemView.setOnClickListener {
+                    listener.onClick(actors[position])
+                }
             }
-            is EmptyViewHolder -> { /* nothing to bind */ }
+            is EmptyViewHolder -> { /* nothing to bind */
+            }
         }
     }
 
@@ -80,9 +83,9 @@ private class DataViewHolder(itemView: View) : ActorsViewHolder(itemView) {
 
     companion object {
         private val imageOption = RequestOptions()
-                .placeholder(R.drawable.ic_avatar_placeholder)
-                .fallback(R.drawable.ic_avatar_placeholder)
-                .circleCrop()
+            .placeholder(R.drawable.ic_avatar_placeholder)
+            .fallback(R.drawable.ic_avatar_placeholder)
+            .circleCrop()
     }
 }
 
@@ -92,6 +95,6 @@ private val RecyclerView.ViewHolder.context
 private const val VIEW_TYPE_EMPTY = 0
 private const val VIEW_TYPE_ACTORS = 1
 
-/*TODO 1: create interface of clickListener with method
-         fun onClick(actor: Actor)
-*/
+interface OnRecyclerItemClicked {
+    fun onClick(actor: Actor)
+}

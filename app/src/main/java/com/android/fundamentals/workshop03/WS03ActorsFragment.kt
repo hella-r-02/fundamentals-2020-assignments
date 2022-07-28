@@ -28,8 +28,7 @@ class WS03ActorsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         recycler = view.findViewById(R.id.rv_actors)
-        //TODO 5: pass click listener to adapter
-        recycler?.adapter = WS03ActorsAdapter()
+        recycler?.adapter = WS03ActorsAdapter(clickListener)
     }
 
     override fun onStart() {
@@ -53,18 +52,18 @@ class WS03ActorsFragment : Fragment() {
     private fun doOnClick(actor: Actor) {
         recycler?.let { rv ->
             Snackbar.make(
-                        rv,
-                        getString(R.string.fragment_actors_chosen_text, actor.name),
-                        Snackbar.LENGTH_SHORT)
+                rv,
+                getString(R.string.fragment_actors_chosen_text, actor.name),
+                Snackbar.LENGTH_SHORT)
                 .show()
         }
     }
 
-    /*TODO 4: create implementation of click listener
-                you can call function
-                doOnClick(actor: Actor)
-     */
-//    private val clickListener
+    private val clickListener = object : OnRecyclerItemClicked {
+        override fun onClick(actor: Actor) {
+            doOnClick(actor)
+        }
+    }
 
     companion object {
         fun newInstance() = WS03ActorsFragment()
