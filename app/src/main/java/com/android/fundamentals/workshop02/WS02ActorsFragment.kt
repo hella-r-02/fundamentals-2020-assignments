@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.android.fundamentals.R
 import com.android.fundamentals.domain.ActorsDataSource
+import com.android.fundamentals.workshop02.solution.WS02ActorsAdapterSolution
 
 class WS02ActorsFragment : Fragment() {
 
