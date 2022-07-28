@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.fundamentals.R
@@ -45,9 +46,11 @@ class WS04DiffUtilsFragment : Fragment() {
 
     private fun shuffleActors() {
         val shuffledList: List<Actor> = ActorsDataSource().getActors().shuffled()
+        val oldList: List<Actor> = ActorsDataSource().getActors()
         adapter.bindActors(shuffledList)
-        // TODO: Replace notifyDataSetChanged for updating the recyclerView to DiffUtil.Callback.
-        adapter.notifyDataSetChanged()
+        val callback = ActorsCallback(oldList = oldList, newList = shuffledList)
+        val diff = DiffUtil.calculateDiff(callback)
+        diff.dispatchUpdatesTo(adapter)
     }
 
     companion object {
