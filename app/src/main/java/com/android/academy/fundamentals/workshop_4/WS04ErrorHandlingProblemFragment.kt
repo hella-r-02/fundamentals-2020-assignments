@@ -34,7 +34,10 @@ class WS04ErrorHandlingProblemFragment : Fragment(R.layout.fragment_ws_04) {
 
     private val superExceptionHandler = CoroutineExceptionHandler { canceledContext, exception ->
         val isActive = coroutineSupervisorScope.isActive
-        Log.e(TAG, "SuperExceptionHandler [Scope active:$isActive, canceledContext:$canceledContext]")
+        Log.e(
+            TAG,
+            "SuperExceptionHandler [Scope active:$isActive, canceledContext:$canceledContext]"
+        )
         coroutineSupervisorScope.launch {
             sb.append("superExceptionHandler scope active:$isActive\n")
             logExceptionSuspend("superExceptionHandler", exception)
@@ -42,10 +45,11 @@ class WS04ErrorHandlingProblemFragment : Fragment(R.layout.fragment_ws_04) {
     }
 
     // TODO 01: Create the CoroutineScope from Default dispatchers and common Job.
-    private fun createScope(): CoroutineScope = TODO()
+    private fun createScope(): CoroutineScope = CoroutineScope(Dispatchers.Default + Job())
 
     // TODO 02: Create the CoroutineScope from Default dispatchers and Supervisor job.
-    private fun createSuperScope(): CoroutineScope = TODO()
+    private fun createSuperScope(): CoroutineScope =
+        CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     private var coroutineScope = createScope()
     private var coroutineSupervisorScope = createSuperScope()
@@ -68,7 +72,7 @@ class WS04ErrorHandlingProblemFragment : Fragment(R.layout.fragment_ws_04) {
     // TODO: UI thread logger SAMPLE.
     private fun loggerSample() {
         try {
-            coroutineScope.launch {  }
+            coroutineScope.launch { }
 
         } catch (throwable: Throwable) {
             logException("loggerSample", throwable)
@@ -91,7 +95,13 @@ class WS04ErrorHandlingProblemFragment : Fragment(R.layout.fragment_ws_04) {
     //  This will fail coroutine with Exception and close Application.
     //  Catch and Log exception with proper Logger method (you can't).
     private fun failLaunchWithException() {
-        methodWithException("failLaunchWithException", coroutineScope.isActive)
+        try {
+            coroutineScope.launch {
+                methodWithException("failLaunchWithException", coroutineScope.isActive)
+            }
+        } catch (throwable: Throwable) {
+            logException("failLaunchWithException", throwable)
+        }
     }
 
     // TODO 04: Run "methodWithException("workWithHandledException")" inside a coroutine:
@@ -99,7 +109,13 @@ class WS04ErrorHandlingProblemFragment : Fragment(R.layout.fragment_ws_04) {
     //  Try to run the method and Catch exception.
     //  Log exception with proper Logger method.
     private fun workWithHandledException() {
-        methodWithException("workWithHandledException", coroutineScope.isActive)
+        coroutineScope.launch {
+            try {
+                methodWithException("workWithHandledException", coroutineScope.isActive)
+            } catch (throwable: Throwable) {
+                logException("workWithHandledException", throwable)
+            }
+        }
     }
 
     // TODO 05: Create "val deferred" with "methodWithException("failAwaitWithException")" inside a deferred:
@@ -110,7 +126,19 @@ class WS04ErrorHandlingProblemFragment : Fragment(R.layout.fragment_ws_04) {
     //  This will fail coroutine with Exception and close Application.
     //  Catch and Log exception with proper Logger method (you can't).
     private fun failAwaitWithException() {
-        methodWithException("failAwaitWithException", coroutineScope.isActive)
+        try {
+            coroutineScope.launch {
+                val deferred = coroutineScope.async {
+                    methodWithException(
+                        "failAwaitWithException",
+                        coroutineScope.isActive
+                    )
+                }
+            }
+        } catch (throwable: Throwable) {
+            logException("failAwaitWithException", throwable)
+        }
+
     }
 
     // TODO 06: Create "val deferred" with "methodWithException("awaitWorkWithHandledException")" inside a deferred:
@@ -120,7 +148,16 @@ class WS04ErrorHandlingProblemFragment : Fragment(R.layout.fragment_ws_04) {
     //  Launch coroutine from regular "coroutineScope".
     //  Await result inside.
     private fun awaitWorkWithHandledException() {
-        methodWithException("awaitWorkWithHandledException", coroutineScope.isActive)
+        val deferred = coroutineScope.async {
+            try {
+                methodWithException("awaitWorkWithHandledException", coroutineScope.isActive)
+            } catch (throwable: Throwable) {
+                logException("awaitWorkWithHandledException", throwable)
+            }
+        }
+        coroutineScope.launch {
+            deferred.await()
+        }
     }
 
     // TODO 07: Run "methodWithException("workWithExceptionHandler")" inside a coroutine:
@@ -129,7 +166,9 @@ class WS04ErrorHandlingProblemFragment : Fragment(R.layout.fragment_ws_04) {
     //  Inspect the realization of the "exceptionHandler".
     //  Why we have to create another scope?
     private fun workWithExceptionHandler() {
-        methodWithException("workWithExceptionHandler", coroutineScope.isActive)
+        coroutineScope.launch(exceptionHandler){
+            methodWithException("workWithExceptionHandler", coroutineScope.isActive)
+        }
     }
 
     // TODO 08: Run "methodWithException("superWorkWithExceptionHandler")" inside a coroutine:
@@ -138,29 +177,32 @@ class WS04ErrorHandlingProblemFragment : Fragment(R.layout.fragment_ws_04) {
     //  Inspect the realization of the "superExceptionHandler".
     //  Why we don't have to create another scope?
     private fun superWorkWithExceptionHandler() {
-        methodWithException("superWorkWithExceptionHandler", coroutineScope.isActive)
+        coroutineSupervisorScope.launch(superExceptionHandler){
+            methodWithException("superWorkWithExceptionHandler", coroutineScope.isActive)
+        }
     }
 
     private fun methodWithException(who: String, isActive: Boolean) {
         sb.clear().append("scope isActive:$isActive")
-                .append("\n")
-                .append("$who::Started")
-                .append("\n")
+            .append("\n")
+            .append("$who::Started")
+            .append("\n")
 
         throw IOException()
     }
 
-    private suspend fun logExceptionSuspend(who: String, throwable: Throwable) = withContext(Dispatchers.Main) {
-        logException(who, throwable)
-    }
+    private suspend fun logExceptionSuspend(who: String, throwable: Throwable) =
+        withContext(Dispatchers.Main) {
+            logException(who, throwable)
+        }
 
     private fun logException(who: String, throwable: Throwable) {
         Log.e(TAG, "$who::Failed", throwable)
         sb.append("$who::Recovered")
         exceptionLogView?.text = getString(
-                R.string.ws04_exception_log_text,
-                sb.toString(),
-                throwable
+            R.string.ws04_exception_log_text,
+            sb.toString(),
+            throwable
         )
     }
 
