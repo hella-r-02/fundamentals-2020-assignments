@@ -55,7 +55,7 @@ class Workshop1Fragment : Fragment(R.layout.fragment_workshop_1_workshop_2), Wor
         //TODO 01: Depending on "loading" value, set "loader" visibility = View.VISIBLE/GONE.
         // And opposite, set "loginBtn" disabled/enabled.
         loader?.isVisible = loading
-        loginBtn?.isEnabled = loading
+        loginBtn?.isEnabled = !loading
     }
 
     override fun showUserNameError() {
