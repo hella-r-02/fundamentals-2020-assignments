@@ -2,6 +2,7 @@ package com.android.foundamentals.workshop01
 
 import com.android.fundamentals.domain.login.LoginInteractor
 import com.android.fundamentals.workshop01.Workshop1Presenter
+import com.android.fundamentals.workshop01.Workshop1View
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
@@ -32,7 +33,7 @@ internal class Workshop1PresenterTest {
 
         // Call presenter method to attach view
         // TODO 09: Uncomment this code.
-        //presenter.attachView(view)
+        presenter.attachView(view)
 
         // Checking the view
         view.assert(
@@ -44,7 +45,7 @@ internal class Workshop1PresenterTest {
 
         // Call presenter method login
         // TODO 10: Uncomment this code and run the test.
-        //presenter.login(userName = "", password = "")
+        presenter.login(userName = "", password = "")
 
         // Checking the view
         view.assert(
@@ -69,7 +70,7 @@ internal class Workshop1PresenterTest {
         val (interactor, presenter, view) = createComponents()
 
         // TODO 11: Call presenter attach view.
-
+        presenter.attachView(view)
         view.assert(
             expectedLoading = false,
             expectedUserNameErrorShownTimes = 0,
@@ -79,7 +80,7 @@ internal class Workshop1PresenterTest {
 
         repeat(10) { index ->
             // TODO 12: Call presenter login with empty name and run test.
-
+            presenter.login(userName = "", password = "")
             view.assert(
                 expectedLoading = true,
                 expectedUserNameErrorShownTimes = index,
@@ -102,7 +103,7 @@ internal class Workshop1PresenterTest {
         val (interactor, presenter, view) = createComponents()
 
         // TODO 13: Call presenter attach view.
-
+        presenter.attachView(view)
         view.assert(
             expectedLoading = false,
             expectedUserNameErrorShownTimes = 0,
@@ -111,7 +112,7 @@ internal class Workshop1PresenterTest {
         )
 
         // TODO 14: Call presenter login with valid name and empty password, and run test.
-
+        presenter.login(userName = "username", password = "")
         view.assert(
             expectedLoading = true,
             expectedUserNameErrorShownTimes = 0,
@@ -133,7 +134,7 @@ internal class Workshop1PresenterTest {
         val (interactor, presenter, view) = createComponents()
 
         // TODO 15: Call presenter attach view.
-
+        presenter.attachView(view)
         view.assert(
             expectedLoading = false,
             expectedUserNameErrorShownTimes = 0,
@@ -142,7 +143,7 @@ internal class Workshop1PresenterTest {
         )
 
         // TODO 16: Call presenter logic with valid data and run test.
-
+        presenter.login(userName = "username", password = "password")
         view.assert(
             expectedLoading = true,
             expectedUserNameErrorShownTimes = 0,
