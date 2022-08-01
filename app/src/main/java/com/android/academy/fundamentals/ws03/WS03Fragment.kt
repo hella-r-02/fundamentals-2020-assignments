@@ -12,6 +12,7 @@ import coil.transform.CircleCropTransformation
 import com.android.academy.fundamentals.BaseFragment
 import com.android.academy.fundamentals.BuildConfig
 import com.android.academy.fundamentals.R
+import com.android.academy.fundamentals.apiKey
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.coroutines.*
 import kotlinx.serialization.SerialName
@@ -19,7 +20,9 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
 import okhttp3.Response
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.http.GET
 import kotlin.random.Random
@@ -88,6 +91,7 @@ class WS03Fragment : BaseFragment() {
             val request = originalRequest.newBuilder()
                 .url(originalHttpUrl)
                 // TODO 05: Add header API_KEY_HEADER with your Api Key to request builder
+                .addHeader(API_KEY_HEADER, apiKey)
                 .build()
 
             return chain.proceed(request)
@@ -102,10 +106,15 @@ class WS03Fragment : BaseFragment() {
         // TODO 01: Instantiate the OkHttpClient val by using ".newBuilder()"
         // TODO 02: Add "HttpLoggingInterceptor" to your Okhttp client
         // TODO 03: Add Logging Level - ".setLevel(HttpLoggingInterceptor.Level.BODY):
+        val okHttpClient = OkHttpClient().newBuilder()
+            .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+            .addInterceptor(CatsApiHeaderInterceptor())
+            .build()
 
         @Suppress("EXPERIMENTAL_API_USAGE")
         private val retrofit: Retrofit = Retrofit.Builder()
             //TODO 04: Add okhttp client to retrofit
+            .client(okHttpClient)
             .baseUrl(BuildConfig.BASE_URL)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
