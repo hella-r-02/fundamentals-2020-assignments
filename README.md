@@ -1,4 +1,11 @@
-# fundamentals-2020-assignments
-This repository will contain assignments for workshops of Fundamentals 2020 Course
+# workshop 1
+Вы потренируетесь создавать и запускать потоки двумя способами и отображать какие-то изменения на экране пользователя. Если кратко - сэмулируем реальные события. (с помощью Thread и Runnable)
 
-Read [wiki](https://github.com/Android-Academy-Global/fundamentals-2020-assignments/wiki)!
+# workshop 2
+Cоздание корутины, выявить и пофиксить причины ANR (Application Not Responding), познакомиться с Dispatcher’ами
+
+# workshop 3
+Запускаем различные корутины в разных контекстах. Отменяем корутины. 
+
+# workshop 4
+Обучение перехвату ошибок в корутинах, запущенных в различных режимах.
