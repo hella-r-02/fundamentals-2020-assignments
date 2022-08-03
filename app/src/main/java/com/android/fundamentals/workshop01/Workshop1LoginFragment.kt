@@ -30,11 +30,13 @@ class Workshop1LoginFragment : Fragment(R.layout.fragment_workshop_1_login) {
         initViews(view)
         setUpListeners()
 
-        viewModel.loginState.observe(viewLifecycleOwner, { loginResult ->
+        viewModel.loginState.observe(viewLifecycleOwner) { loginResult ->
             loginResult ?: return@observe
 
             when (loginResult) {
-                is LoginResult.Loading -> setLoading(true)
+                is LoginResult.Loading -> {
+                    setLoading(true)
+                }
                 is LoginResult.Error.UserName -> {
                     setLoading(false)
                     showUserNameError()
@@ -48,7 +50,7 @@ class Workshop1LoginFragment : Fragment(R.layout.fragment_workshop_1_login) {
                     showSuccess()
                 }
             }
-        })
+        }
     }
 
     override fun onDestroyView() {
