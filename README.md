@@ -1,4 +1,11 @@
-# fundamentals-2020-assignments
-This repository will contain assignments for workshops of Fundamentals 2020 Course
+# workshop 1
+Задача: 
+Разобраться с работой SharedPreferences, реализовав логику логина в приложении путем сохранения токена в SharedPreferences, проверки этого пользователя при перезапуске приложения и удалении юзера при логауте
 
-Read [wiki](https://github.com/Android-Academy-Global/fundamentals-2020-assignments/wiki)!
+# workshop 2
+Задача: необходимо реализовать Workshop2LocationRepository для того чтобы отображать список локейшенов, которые хранятся в базе. Презентационный слой(ViewModel, Fragment) уже реализован. Workshop2LocationRepository должен использоавть SqlOpenHelper, Cursor, ContentValues про который рассказывалось в лекции.
+В Workshop2LocationRepository Вы должны реализовать возможности добавлять, удалять, получать значения из базы данных.
+
+# workshop 3
+
+Обучение работе с ORM Room. Создание sqlite БД с помощью Room, запись и выборка данных.
