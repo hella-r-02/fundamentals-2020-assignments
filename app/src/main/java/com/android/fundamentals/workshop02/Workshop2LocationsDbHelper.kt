@@ -14,7 +14,7 @@ class Workshop2LocationsDbHelper(
          * To execute this SQL-request call [SQLiteDatabase.execSQL] on [db] instance and pass [SQL_CREATE_ENTRIES] as parameter.
          */
 
-//        db.execSQL(SQL_CREATE_ENTRIES)
+        db.execSQL(SQL_CREATE_ENTRIES)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -27,8 +27,8 @@ class Workshop2LocationsDbHelper(
          * but as we already have it inside [onCreate], let just call [onCreate].
          */
 
-//        db.execSQL(SQL_DELETE_ENTRIES)
-//        onCreate(db)
+        db.execSQL(SQL_DELETE_ENTRIES)
+        onCreate(db)
     }
 
     companion object {

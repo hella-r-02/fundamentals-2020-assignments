@@ -6,7 +6,6 @@ import android.database.sqlite.SQLiteDatabase
 import com.android.fundamentals.domain.location.Location
 import com.android.fundamentals.domain.location.LocationRepository
 import com.android.fundamentals.workshop02_03.NewLocationRequest
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -21,17 +20,18 @@ class Workshop2LocationRepository(
     /** TODO 03: here you should create [Workshop2LocationsDbHelper] instance.
      * Pass [appContext] to [Workshop2LocationsDbHelper] constructor.
      */
-    private val dbHelper: Workshop2LocationsDbHelper = TODO()
+    private val dbHelper: Workshop2LocationsDbHelper =
+        Workshop2LocationsDbHelper(context = appContext)
 
     /** TODO 04: here you should lazy create [readableDatabase] instance from [dbHelper].
      * Call [dbHelper.readableDatabase] inside lazy block instead of TODO().
      */
-    private val readableDatabase: SQLiteDatabase by lazy { TODO() }
+    private val readableDatabase: SQLiteDatabase by lazy { dbHelper.readableDatabase }
 
     /** TODO 05: here you should lazy create [writableDatabase] instance from [dbHelper].
      * Call [dbHelper.writableDatabase] inside lazy block instead of TODO().
      */
-    private val writableDatabase: SQLiteDatabase by lazy { TODO() }
+    private val writableDatabase: SQLiteDatabase by lazy { dbHelper.writableDatabase }
 
     override suspend fun getAllLocations(): List<Location> = withContext(Dispatchers.IO) {
         // Define a projection that specifies which columns from the database
@@ -42,7 +42,10 @@ class Workshop2LocationRepository(
              * Fist column for [Location.id] is already presented below : [LocationsContract.LocationEntry.COLUMN_NAME_ID].
              */
             LocationsContract.LocationEntry.COLUMN_NAME_ID,
-            //...
+            LocationsContract.LocationEntry.COLUMN_NAME_TITLE,
+            LocationsContract.LocationEntry.COLUMN_NAME_LATITUDE,
+            LocationsContract.LocationEntry.COLUMN_NAME_LONGITUDE
+
         )
 
         // How you want the results sorted in the resulting Cursor
@@ -52,7 +55,7 @@ class Workshop2LocationRepository(
             /** TODO 07: here instead of TODO() you should add table name for query.
              * [LocationsContract.LocationEntry.TABLE_NAME] is a table name, that should be added as a first parameter.
              */
-            TODO(),   // The table to query
+            LocationsContract.LocationEntry.TABLE_NAME,   // The table to query
             projection, // The array of columns to return (pass null to get all)
             null,   // The columns for the WHERE clause
             null,   // The values for the WHERE clause
@@ -73,7 +76,7 @@ class Workshop2LocationRepository(
                          * in same way as it is already done for [Location.latitude] above.
                          * [LocationsContract.LocationEntry.COLUMN_NAME_LONGITUDE] is a column name.
                          */
-                        longitude = TODO()
+                        longitude = cursor.getDouble(cursor.getColumnIndexOrThrow(LocationsContract.LocationEntry.COLUMN_NAME_LONGITUDE))
                     )
                 )
             }
@@ -104,51 +107,42 @@ class Workshop2LocationRepository(
         }
 
     private suspend fun saveNewLocation(request: NewLocationRequest) = withContext(Dispatchers.IO) {
-        /** TODO 09, 10, 11: here you should uncomment try/finally block
-         */
+        writableDatabase.beginTransaction()
+        try {
 
-        /** TODO 12: here you should start new transaction.
-         * to start new transaction call [SQLiteDatabase.beginTransaction] on [writableDatabase] instance: [writableDatabase.beginTransaction()].
-         */
+            val contentValues = ContentValues()
+            contentValues.put(LocationsContract.LocationEntry.COLUMN_NAME_TITLE, request.title)
 
+            /** TODO 15: here instead of TODO() you should pass [request.latitude]
+             * to [contentValues] via [ContentValues.put] function.
+             */
+            contentValues.put(
+                LocationsContract.LocationEntry.COLUMN_NAME_LATITUDE,
+                request.latitude as Double
+            )
 
-        //TODO 09: uncomment line below.
-//        try {
+            /** TODO 16: here instead of TODO() you should pass [request.longitude]
+             * to [contentValues] via [ContentValues.put] function.
+             */
+            contentValues.put(
+                LocationsContract.LocationEntry.COLUMN_NAME_LONGITUDE,
+                request.longitude as Double
+            )
 
-        val contentValues = ContentValues()
-        contentValues.put(LocationsContract.LocationEntry.COLUMN_NAME_TITLE, request.title)
+            writableDatabase.insert(
+                LocationsContract.LocationEntry.TABLE_NAME,
+                null,
+                contentValues
+            )
 
-        /** TODO 15: here instead of TODO() you should pass [request.latitude]
-         * to [contentValues] via [ContentValues.put] function.
-         */
-        contentValues.put(LocationsContract.LocationEntry.COLUMN_NAME_LATITUDE, TODO() as Double)
-
-        /** TODO 16: here instead of TODO() you should pass [request.longitude]
-         * to [contentValues] via [ContentValues.put] function.
-         */
-        contentValues.put(LocationsContract.LocationEntry.COLUMN_NAME_LONGITUDE, TODO() as Double)
-
-        writableDatabase.insert(
-            LocationsContract.LocationEntry.TABLE_NAME,
-            null,
-            contentValues
-        )
-
-        /** TODO 13: here you should mark transaction as successful.
-         * call [SQLiteDatabase.setTransactionSuccessful] on [writableDatabase] instance: [writableDatabase.setTransactionSuccessful()].
-         */
-
-
-        //TODO 10: uncomment line below.
-//        } finally {
-
-        /** TODO 14: here you must complete the transaction regardless of whether it was successful or unsuccessful.
-         * So completing the transaction should be done in finally block.
-         * call [SQLiteDatabase.endTransaction] on [writableDatabase] instance: [writableDatabase.endTransaction()].
-         */
-
-        //TODO 11: uncomment line below.
-//        }
+            /** TODO 13: here you should mark transaction as successful.
+             * call [SQLiteDatabase.setTransactionSuccessful] on [writableDatabase] instance: [writableDatabase.setTransactionSuccessful()].
+             */
+            writableDatabase.setTransactionSuccessful()
+        }
+        finally {
+            writableDatabase.endTransaction()
+        }
     }
 
     private suspend fun deleteById(id: Long) = withContext(Dispatchers.IO) {
@@ -163,7 +157,7 @@ class Workshop2LocationRepository(
                 LocationsContract.LocationEntry.TABLE_NAME,
                 selection,
                 /** TODO 17: here instead of TODO() you should add [selectionArgs].*/
-                TODO()
+                selectionArgs
             )
 
             writableDatabase.setTransactionSuccessful()
