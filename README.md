@@ -1,4 +1,8 @@
-# fundamentals-2020-assignments
-This repository will contain assignments for workshops of Fundamentals 2020 Course
+# workshop 1
+создание OkHttp client, построение http get request, запуск синхронного и асинхронного запросов.
+ 
+# workshop 2
+использование retrofit
 
-Read [wiki](https://github.com/Android-Academy-Global/fundamentals-2020-assignments/wiki)!
+# workshop 3
+okhttp-интерсепторы
