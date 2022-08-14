@@ -1,5 +1,6 @@
 package com.android.academy.fundamentals.app.workshop01
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -23,12 +24,16 @@ class WS01Fragment : Fragment() {
             // create intent
             // Intent(context, WS01StartedService::class.java)
             // put it into method context?.startService(intent)
+            val intent = Intent(context, WS01Service::class.java)
+            context?.startService(intent)
         }
         view.findViewById<View>(R.id.stop_started_service)?.setOnClickListener {
             //TODO 07 : stop service
             // create intent
             // Intent(context, WS01StartedService::class.java)
             // put it into method context?.stopService(intent)
+            val intent = Intent(context, WS01Service::class.java)
+            context?.stopService(intent)
         }
     }
 

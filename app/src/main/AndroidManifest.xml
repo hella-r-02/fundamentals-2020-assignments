@@ -23,7 +23,7 @@
         </activity>
 
         <service
-            android:name=".workshop01.solution.WS01StartedService"
+            android:name=".workshop01.WS01Service"
             android:exported="false"
             />
 
