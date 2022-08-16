@@ -6,6 +6,8 @@ import com.android.academy.fundamentals.app.workshop01.WS01Fragment
 import com.android.academy.fundamentals.app.workshop02.Ws02Fragment
 import com.android.academy.fundamentals.app.workshop03.WS03Fragment
 import com.android.academy.fundamentals.app.workshop03.solution.WS03FragmentSolution
+import com.android.academy.fundamentals.app.workshop04.WS04Fragment
+import com.android.academy.fundamentals.app.workshop04.solution.WS04FragmentSolution
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -14,7 +16,7 @@ class MainActivity : AppCompatActivity() {
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.container, WS03FragmentSolution.create())
+                .replace(R.id.container, WS04Fragment.create())
                 .commit()
         }
     }
