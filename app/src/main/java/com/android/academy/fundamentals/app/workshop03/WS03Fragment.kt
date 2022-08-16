@@ -33,8 +33,10 @@ class WS03Fragment : Fragment() {
 
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                     //TODO 10: Call context.startForegroundService and pass startServiceIntent
+                    context.startForegroundService(startServiceIntent)
                 } else {
                     //TODO 11: Call context.startService and pass startServiceIntent
+                    context.startService(startServiceIntent)
                 }
             }
         }
@@ -43,6 +45,7 @@ class WS03Fragment : Fragment() {
             setOnClickListener {
                 val intent = Intent(context, WS03Service::class.java)
                 //TODO 12: Call context.stopService and pass intent
+                context.stopService(intent)
             }
         }
 
