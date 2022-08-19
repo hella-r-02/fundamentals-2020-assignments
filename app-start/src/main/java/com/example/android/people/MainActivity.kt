@@ -74,6 +74,12 @@ class MainActivity : AppCompatActivity(R.layout.main_activity), NavigationContro
                 get the id val id = intent.data?.lastPathSegment?.toLongOrNull()
                 check that id is not null and openChat(id, null)
              */
+            Intent.ACTION_VIEW -> {
+                val id = intent.data?.lastPathSegment?.toLongOrNull()
+                if (id != null) {
+                    openChat(id, null)
+                }
+            }
             // Invoked when a text is shared through Direct Share.
             Intent.ACTION_SEND -> {
                 val shortcutId = intent.getStringExtra(Intent.EXTRA_SHORTCUT_ID)
@@ -114,10 +120,15 @@ class MainActivity : AppCompatActivity(R.layout.main_activity), NavigationContro
              add this line
             supportFragmentManager.popBackStack(FRAGMENT_CHAT, FragmentManager.POP_BACK_STACK_INCLUSIVE)
          */
+        supportFragmentManager.popBackStack(FRAGMENT_CHAT, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         /* TODO 3 Open the chat screen.
             Create chat fragment with arguments id, true, prepopulateText.
             Open Chat screen using fragment manager. Hint: create transaction, replace fragment, and add to the back stack. 
          */
+        supportFragmentManager.commit {
+            addToBackStack(FRAGMENT_CHAT)
+            replace(R.id.container, ChatFragment.newInstance(id, true, prepopulateText))
+        }
     }
 
     override fun openPhoto(photo: Uri) {

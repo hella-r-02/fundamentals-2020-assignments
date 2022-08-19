@@ -83,7 +83,6 @@
             android:authorities="com.example.android.people"
             android:exported="true"
             tools:ignore="ExportedContentProvider" />
-
     </application>
 
 </manifest>
