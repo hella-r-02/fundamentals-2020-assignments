@@ -21,10 +21,10 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.annotation.WorkerThread
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.app.RemoteInput
+import androidx.core.app.*
 import androidx.core.graphics.drawable.IconCompat
+import androidx.core.net.toUri
+import com.example.android.people.MainActivity
 import com.example.android.people.R
 import com.example.android.people.ReplyReceiver
 
@@ -51,7 +51,7 @@ class AndroidNotifications(private val context: Context) : Notifications {
     }
 
     private val notificationManagerCompat: NotificationManagerCompat =
-            NotificationManagerCompat.from(context)
+        NotificationManagerCompat.from(context)
 
     override fun initialize() {
         if (notificationManagerCompat.getNotificationChannel(CHANNEL_NEW_MESSAGES) == null) {
@@ -72,11 +72,47 @@ class AndroidNotifications(private val context: Context) : Notifications {
 
                 Note: Don't forget we have context in the class already
 */
+            notificationManagerCompat.createNotificationChannel(
+                NotificationChannelCompat.Builder(
+                    CHANNEL_NEW_MESSAGES,
+                    NotificationManagerCompat.IMPORTANCE_HIGH
+                )
+                    .setName(context.getString(R.string.channel_new_messages))
+                    .setDescription(context.getString(R.string.channel_new_messages_description))
+                    .build()
+            )
         }
     }
 
     @WorkerThread
     override fun showNotification(chat: Chat) {
+        /*
+                #4 Open Chat From The Notification
+
+                a) Form deep link (`contentUri`):
+                   Use string pattern `https://android.example.com/chat/$chat.contact.id`
+                   Use Android KTX method `String.toUri()` to convert it to Uri
+
+                b) Create Chat Intent (`chatIntent`):
+                   Create explicit intent for `MainActivity` class
+                   Set action view `Intent.ACTION_VIEW`
+                   Set `contentUri` as data
+
+                c) Create a Pending Intent (`pendingIntent`):
+                   Use `PendingIntent.getActivity()`
+                   Use `REQUEST_CONTENT` as Request Code
+                   Use `chatIntent` as Intent
+                   Use `PendingIntent.FLAG_UPDATE_CURRENT` as Flags
+
+                d) Pass pending intent to the notification builder:
+                   Pass `pendingIntent` to builder with `setContentIntent()` setter
+*/
+        val contentUrl = "https://android.example.com/chat/${chat.contact.id}".toUri()
+        val icon = IconCompat.createWithContentUri(chat.contact.iconUri)
+        val person = Person.Builder()
+            .setName(chat.contact.name)
+            .setIcon(icon)
+            .build()
 /*
 
                 #2 Show The Notification
@@ -96,29 +132,48 @@ class AndroidNotifications(private val context: Context) : Notifications {
                    use `chat.contact.id` as notification ID
 
 */
+        val builder = NotificationCompat.Builder(context, CHANNEL_NEW_MESSAGES)
+            .setContentTitle(chat.contact.name)
+            .setContentText(chat.messages.last().text)
+            .setSmallIcon(R.drawable.ic_message)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(
+                PendingIntent.getActivity(
+                    context,
+                    REQUEST_CONTENT,
+                    Intent(context, MainActivity::class.java)
+                        .setAction(Intent.ACTION_VIEW)
+                        .setData(contentUrl),
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                )
+            )
+            .addReplyAction(context, contentUrl)
+            .setStyle(
+                NotificationCompat.MessagingStyle(person)
+                    .run {
+                        for (message in chat.messages) {
+                            val m = NotificationCompat.MessagingStyle.Message(
+                                message.text,
+                                message.timestamp,
+                                if (message.isIncoming) person else null
+                            ).apply {
+                                if (message.photoUri != null) {
+                                    setData(message.photoMimeType, message.photoUri)
+                                }
+                            }
+                            if (!message.isNew) {
+                                addHistoricMessage(m)
+                            } else {
+                                addMessage(m)
+                            }
+                        }
+                        this
+                    }
+                    .setGroupConversation(false)
+            )
+            .setWhen(chat.messages.last().timestamp)
 
-
-/*
-                #4 Open Chat From The Notification
-                
-                a) Form deep link (`contentUri`): 
-                   Use string pattern `https://android.example.com/chat/$chat.contact.id`
-                   Use Android KTX method `String.toUri()` to convert it to Uri
-                 
-                b) Create Chat Intent (`chatIntent`):
-                   Create explicit intent for `MainActivity` class
-                   Set action view `Intent.ACTION_VIEW`
-                   Set `contentUri` as data
-                   
-                c) Create a Pending Intent (`pendingIntent`):
-                   Use `PendingIntent.getActivity()`
-                   Use `REQUEST_CONTENT` as Request Code
-                   Use `chatIntent` as Intent
-                   Use `PendingIntent.FLAG_UPDATE_CURRENT` as Flags
-                   
-                d) Pass pending intent to the notification builder:
-                   Pass `pendingIntent` to builder with `setContentIntent()` setter
-*/
+        notificationManagerCompat.notify(CHAT_TAG, chat.contact.id.toInt(), builder.build())
 
 // TODO #1 from Workshop #3: Call on notification builder setReplyAction extension
 
@@ -159,33 +214,33 @@ class AndroidNotifications(private val context: Context) : Notifications {
                 
                 Simply call `notificationManagerCompat.cancel` with `CHAT_TAG` as tag and `chatId` as 
                     notification ID
-                    
 */
+        notificationManagerCompat.cancel(CHAT_TAG, chatId.toInt())
     }
 
     private fun NotificationCompat.Builder.addReplyAction(
-            context: Context,
-            contentUri: Uri
+        context: Context,
+        contentUri: Uri
     ): NotificationCompat.Builder {
         addAction(
-                NotificationCompat.Action
-                        .Builder(
-                                IconCompat.createWithResource(context, R.drawable.ic_send),
-                                context.getString(R.string.label_reply),
-                                PendingIntent.getBroadcast(
-                                        context,
-                                        REQUEST_CONTENT,
-                                        Intent(context, ReplyReceiver::class.java).setData(contentUri),
-                                        PendingIntent.FLAG_UPDATE_CURRENT
-                                )
-                        )
-                        .addRemoteInput(
-                                RemoteInput.Builder(ReplyReceiver.KEY_TEXT_REPLY)
-                                        .setLabel(context.getString(R.string.hint_input))
-                                        .build()
-                        )
-                        .setAllowGeneratedReplies(true)
+            NotificationCompat.Action
+                .Builder(
+                    IconCompat.createWithResource(context, R.drawable.ic_send),
+                    context.getString(R.string.label_reply),
+                    PendingIntent.getBroadcast(
+                        context,
+                        REQUEST_CONTENT,
+                        Intent(context, ReplyReceiver::class.java).setData(contentUri),
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                    )
+                )
+                .addRemoteInput(
+                    RemoteInput.Builder(ReplyReceiver.KEY_TEXT_REPLY)
+                        .setLabel(context.getString(R.string.hint_input))
                         .build()
+                )
+                .setAllowGeneratedReplies(true)
+                .build()
         )
         return this
     }
