@@ -176,7 +176,6 @@ class AndroidNotifications(private val context: Context) : Notifications {
         notificationManagerCompat.notify(CHAT_TAG, chat.contact.id.toInt(), builder.build())
 
 // TODO #1 from Workshop #3: Call on notification builder setReplyAction extension
-
 /*
                 #5 Style Notification as Chat (Optional)
 

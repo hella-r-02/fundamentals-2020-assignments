@@ -90,6 +90,7 @@
         <receiver
            android:name="com.example.android.people.ReplyReceiver" />
         -->
+        <receiver android:name="com.example.android.people.ReplyReceiver" />
         <provider
             android:name="com.example.android.people.AssetFileProvider"
             android:authorities="com.example.android.people"
